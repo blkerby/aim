@@ -241,6 +241,30 @@ test('picks local summaries with dashed guides and values entirely in axis margi
   await page.context().setOffline(false);
 });
 
+test('picks samples from every chart margin, including the latest point from the right', async ({ page }) => {
+  await select(page, ['metric_01']);
+  await page.getByRole('button', { name: 'Ⅱ Pause' }).click();
+  const chart = page.locator('[data-metric="metric_01"]');
+  await expect(chart).toHaveAttribute('aria-busy', 'false');
+  const rect = (await chart.locator('canvas').boundingBox())!;
+  const endpoint = (await chart.locator('.endpoint-marker').boundingBox())!;
+  await page.mouse.move(rect.x + rect.width - 5, endpoint.y + endpoint.height / 2);
+  await expect(chart.locator('.hover-x')).toHaveText('200');
+  await expect(chart.locator('.hover-point')).toBeVisible();
+  for (const [x, y] of [[5, rect.height / 2], [rect.width / 2, 5], [rect.width / 2, rect.height - 5]]) {
+    await page.mouse.move(rect.x + x, rect.y + y);
+    await expect(chart.locator('.hover-point')).toBeVisible();
+  }
+  // The value boxes must not intercept the pointer or dismiss the highlight.
+  for (const label of ['.hover-x', '.hover-y']) {
+    const box = (await chart.locator(label).boundingBox())!;
+    await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+    await expect(chart.locator('.hover-point')).toBeVisible();
+  }
+  await page.mouse.move(10, 10);
+  await expect(chart.locator('.hover-point, .hover-axis-label')).toHaveCount(0);
+});
+
 test('picks log-scale samples and clears the highlight during zoom and on leaving', async ({ page }) => {
   await select(page, ['metric_01']);
   await page.getByRole('button', { name: 'Ⅱ Pause' }).click();

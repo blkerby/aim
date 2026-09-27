@@ -173,15 +173,11 @@ export default function Chart({ theme, metric, runs, view, full, refresh, onView
           if (dragRef.current) { dragRef.current = [dragRef.current[0], localX(event.clientX)]; setDrag([...dragRef.current]); }
           else {
             const rect = event.currentTarget.getBoundingClientRect();
-            const x = (event.clientX - rect.left - LEFT) / (size.width - LEFT - RIGHT);
-            const y = (event.clientY - rect.top - TOP) / (size.height - TOP - BOTTOM);
-            if (x >= 0 && x <= 1 && y >= 0 && y <= 1) {
-              pendingPointer.current = [event.clientX - rect.left, event.clientY - rect.top];
-              if (!hoverFrame.current) hoverFrame.current = requestAnimationFrame(() => {
-                hoverFrame.current = 0; setPointer(pendingPointer.current);
-              });
-            }
-            else clearHover();
+            // Include the axis margins, preserving true cursor distance to edge samples.
+            pendingPointer.current = [event.clientX - rect.left, event.clientY - rect.top];
+            if (!hoverFrame.current) hoverFrame.current = requestAnimationFrame(() => {
+              hoverFrame.current = 0; setPointer(pendingPointer.current);
+            });
           }
         }}
         onPointerUp={event => {
