@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import type { Domain, Metric, Run, View } from './types';
 import { contextLabel, defaultView, displayDomain, extent, includesLatest, runColor } from './geometry';
 import { useSize } from './hooks';
@@ -33,6 +33,7 @@ function savedLayout() {
 }
 
 export default function App() {
+  const [theme, setTheme] = useState<'light' | 'dark'>(() => document.documentElement.dataset.theme === 'dark' ? 'dark' : 'light');
   const [layout, setLayout] = useState(savedLayout);
   const { collapsed, columns } = layout;
   const [runs, setRuns] = useState<Run[]>([]), [metrics, setMetrics] = useState<Metric[]>([]);
@@ -47,6 +48,11 @@ export default function App() {
   const lastCatalogRequest = useRef('');
   const [grid, gridSize] = useSize<HTMLDivElement>();
   const [scroll, setScroll] = useState(0);
+  useLayoutEffect(() => {
+    document.documentElement.dataset.theme = theme;
+    try { localStorage.setItem('aim-viewer:theme', theme); } catch { /* Storage may be disabled. */ }
+    document.querySelector('meta[name="theme-color"]')?.setAttribute('content', getComputedStyle(document.documentElement).getPropertyValue('--page-bg').trim());
+  }, [theme]);
   const selectedKey = selectedRuns.join('|');
 
   useEffect(() => {
@@ -150,7 +156,7 @@ export default function App() {
     }
     setLinked(!linked);
   };
-  const runItems = useMemo(() => runs.filter(r => `${r.name} ${r.id} ${r.experiment || ''}`.toLowerCase().includes(runSearch.toLowerCase())).map(r => ({ id: r.id, label: r.name || r.id.slice(0, 12), detail: `${r.createdAt.slice(0, 10)} · ${r.id.slice(0, 8)}${r.archived ? ' · archived' : ''}`, color: runColor(r.id) })), [runs, runSearch]);
+  const runItems = useMemo(() => runs.filter(r => `${r.name} ${r.id} ${r.experiment || ''}`.toLowerCase().includes(runSearch.toLowerCase())).map(r => ({ id: r.id, label: r.name || r.id.slice(0, 12), detail: `${r.createdAt.slice(0, 10)} · ${r.id.slice(0, 8)}${r.archived ? ' · archived' : ''}`, color: runColor(r.id, theme === 'dark') })), [runs, runSearch, theme]);
   const metricItems = useMemo(() => metrics.filter(m => `${m.name} ${contextLabel(m)}`.toLowerCase().includes(metricSearch.toLowerCase())).map(m => ({ id: m.id, label: m.name, detail: contextLabel(m) })), [metrics, metricSearch]);
   const totalRows = Math.ceil(chosenMetrics.length / columns);
   const start = Math.max(0, Math.floor(scroll / ROW_HEIGHT) - 1), end = Math.min(totalRows, Math.ceil((scroll + gridSize.height) / ROW_HEIGHT) + 1);
@@ -185,7 +191,12 @@ export default function App() {
           <div className="toolbar-actions">
             <label className="column-select">Per row <select className="button" aria-label="Charts per row" value={columns} onChange={e => changeColumns(Number(e.target.value))}>{[1, 2, 3, 4, 5].map(n => <option key={n} value={n}>{n}</option>)}</select></label>
             <label className="link-toggle"><input type="checkbox" checked={linked} onChange={toggleLinked} /> Link x-axes</label>
-            <button className="button" onClick={() => setPaused(!paused)}>{paused ? '▶ Resume' : 'Ⅱ Pause'}</button><button className="button refresh-button" disabled={busy} onClick={() => setRefresh(x => x + 1)} aria-label="Refresh now" title="Refresh now">↻</button></div>
+            <button className="button" onClick={() => setPaused(!paused)}>{paused ? '▶ Resume' : 'Ⅱ Pause'}</button><button className="button refresh-button" disabled={busy} onClick={() => setRefresh(x => x + 1)} aria-label="Refresh now" title="Refresh now">↻</button>
+            <button className="button theme-toggle" aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'} title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'} aria-pressed={theme === 'dark'} onClick={() => setTheme(old => old === 'dark' ? 'light' : 'dark')}>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                {theme === 'dark' ? <><circle cx="12" cy="12" r="4" /><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5" /></> : <path d="M20.5 14A8.7 8.7 0 0 1 10 3.5 8.7 8.7 0 1 0 20.5 14Z" />}
+              </svg>
+            </button></div>
         </div>
         {error && <div className="error-banner" role="alert">{error}</div>}
         <div className="chart-scroll" ref={grid} onScroll={e => setScroll(e.currentTarget.scrollTop)}>
@@ -194,7 +205,7 @@ export default function App() {
               {Array.from({ length: Math.max(0, end - start) }, (_, offset) => start + offset).map(row => <div className="chart-row" key={row} style={{ top: row * ROW_HEIGHT, gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))` }}>
                 {chosenMetrics.slice(row * columns, (row + 1) * columns).map(metric => {
                   const own = views[metric.id] || defaultView();
-                  return <Chart key={metric.id} metric={metric} runs={chosenRuns} view={linked ? { ...linkedView, scale: own.scale } : own} full={linked ? globalExtent : extent(metric) || [0, 1]} refresh={refresh} onView={next => changeView(metric.id, next)} onFocus={() => focusChart(metric.id)} />;
+                  return <Chart theme={theme} key={metric.id} metric={metric} runs={chosenRuns} view={linked ? { ...linkedView, scale: own.scale } : own} full={linked ? globalExtent : extent(metric) || [0, 1]} refresh={refresh} onView={next => changeView(metric.id, next)} onFocus={() => focusChart(metric.id)} />;
                 })}
               </div>)}
             </div>}

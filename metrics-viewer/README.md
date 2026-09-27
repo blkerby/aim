@@ -29,6 +29,8 @@ terminals. Vite proxies `/api` to port 43801.
 
 ## Controls
 
+- The sun/moon button toggles light/dark mode in one click. The preference is
+  remembered; switching themes preserves selections, zooms, and loaded data.
 - The panel button at the left of the toolbar collapses/expands the Runs/Metrics
   sidebar. **Per row** selects one to five charts. Both settings are remembered.
   Narrow windows scroll horizontally when needed to keep charts usable.

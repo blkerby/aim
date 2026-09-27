@@ -14,10 +14,10 @@ const EMPTY_ROWS: Summary[] = [];
 interface Snapshot { spec: SeriesSpec; rows: Summary[] }
 
 interface Props {
-  metric: Metric; runs: Run[]; view: View; full: Domain; refresh: number;
+  theme: 'light' | 'dark'; metric: Metric; runs: Run[]; view: View; full: Domain; refresh: number;
   onView: (view: View) => void; onFocus: () => void;
 }
-export default function Chart({ metric, runs, view, full, refresh, onView, onFocus }: Props) {
+export default function Chart({ theme, metric, runs, view, full, refresh, onView, onFocus }: Props) {
   const [host, size] = useSize<HTMLDivElement>();
   const canvas = useRef<HTMLCanvasElement>(null);
   const requestedDomain = displayDomain(view, full);
@@ -98,6 +98,9 @@ export default function Chart({ metric, runs, view, full, refresh, onView, onFoc
     const node = canvas.current; if (!node || !size.width || !size.height) return;
     node.width = Math.round(size.width * size.dpr); node.height = Math.round(size.height * size.dpr);
     const ctx = node.getContext('2d')!;
+    const colors = getComputedStyle(node);
+    const gridColor = colors.getPropertyValue('--plot-grid').trim();
+    const tickColor = colors.getPropertyValue('--plot-tick').trim();
     ctx.setTransform(size.dpr, 0, 0, size.dpr, 0, 0);
     ctx.clearRect(0, 0, size.width, size.height);
     ctx.font = '11px ui-monospace, SFMono-Regular, monospace'; ctx.textBaseline = 'middle';
@@ -105,14 +108,14 @@ export default function Chart({ metric, runs, view, full, refresh, onView, onFoc
     let yTicks = yScale.ticks(5);
     if (yTicks.length > 8) yTicks = yTicks.filter((_, i) => i % Math.ceil(yTicks.length / 8) === 0);
     for (const value of yTicks) {
-      const y = yScale(value); ctx.strokeStyle = '#e8ece9'; ctx.lineWidth = 1;
+      const y = yScale(value); ctx.strokeStyle = gridColor; ctx.lineWidth = 1;
       ctx.beginPath(); ctx.moveTo(LEFT, y); ctx.lineTo(size.width - RIGHT, y); ctx.stroke();
-      ctx.fillStyle = '#758078'; ctx.fillText(number(value), LEFT - 9, y);
+      ctx.fillStyle = tickColor; ctx.fillText(number(value), LEFT - 9, y);
     }
     const xScale = scaleLinear().domain(domain).range([LEFT, size.width - RIGHT]);
     ctx.textAlign = 'center';
     for (const value of xScale.ticks(Math.max(2, Math.floor((size.width - LEFT - RIGHT) / 100)))) {
-      ctx.fillStyle = '#758078'; ctx.fillText(number(value), xScale(value), size.height - 12);
+      ctx.fillStyle = tickColor; ctx.fillText(number(value), xScale(value), size.height - 12);
     }
     ctx.save(); ctx.beginPath(); ctx.rect(LEFT, TOP, size.width - LEFT - RIGHT, size.height - TOP - BOTTOM); ctx.clip();
     // Dense bins are pixel rectangles; local sparse samples use true sloped
@@ -121,8 +124,8 @@ export default function Chart({ metric, runs, view, full, refresh, onView, onFoc
     const x0 = Math.round(LEFT * size.dpr);
     ctx.globalAlpha = visibleRows.length > 20 ? 0.6 : 0.82;
     for (const row of visibleRows) {
-      ctx.fillStyle = runColor(row.run);
-      ctx.strokeStyle = runColor(row.run); ctx.lineWidth = size.dpr; ctx.beginPath();
+      ctx.fillStyle = runColor(row.run, theme === 'dark');
+      ctx.strokeStyle = runColor(row.run, theme === 'dark'); ctx.lineWidth = size.dpr; ctx.beginPath();
       paintEnvelope(row, x0, value => (xScale(value) * size.dpr), value => (yScale(value) * size.dpr), {
         vertical: (x, top, bottom) => ctx.fillRect(x, top, Math.max(1, width / dataWidth), Math.max(1, bottom - top + 1)),
         line: (x1, y1, x2, y2) => { ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); },
@@ -131,7 +134,7 @@ export default function Chart({ metric, runs, view, full, refresh, onView, onFoc
       ctx.stroke();
     }
     ctx.restore();
-  }, [snapshot, size.width, size.height, size.dpr, yScale]);
+  }, [snapshot, size.width, size.height, size.dpr, yScale, theme]);
 
   const index = useMemo(() => buildPickIndex(rows, LEFT, size.width - LEFT - RIGHT, yScale), [rows, size.width, yScale]);
   const [pointer, setPointer] = useState<Domain | null>(null);
@@ -199,18 +202,18 @@ export default function Chart({ metric, runs, view, full, refresh, onView, onFoc
         const run = runs.find(run => run.id === row.run);
         return <span key={row.run} className={`endpoint-marker${run?.active ? ' active' : ''}`} role="img"
           aria-label={`${run?.name || row.run}, latest step ${number(step)}${run?.active ? ', active' : ''}`}
-          style={{ left: LEFT + (step - domain[0]) / (domain[1] - domain[0]) * (size.width - LEFT - RIGHT), top: yScale(value), background: runColor(row.run) }} />;
+          style={{ left: LEFT + (step - domain[0]) / (domain[1] - domain[0]) * (size.width - LEFT - RIGHT), top: yScale(value), background: runColor(row.run, theme === 'dark') }} />;
       })}
       {drag && <div className="zoom-selection" style={{ left: LEFT + Math.min(...drag) * (size.width - LEFT - RIGHT), width: Math.abs(drag[1] - drag[0]) * (size.width - LEFT - RIGHT), top: TOP, bottom: BOTTOM }} />}
       {!hasValues && <div className="plot-empty">{loading ? <><span className="spinner" /> Reading histories…</> : scale === 'log' ? 'No positive values in this range' : 'No values in this range'}</div>}
       {picked && <>
         <svg className="hover-guides" width={size.width} height={size.height} role="img"
           aria-label={`Highlighted point for ${runs.find(run => run.id === picked.run)?.name || picked.run}: step ${picked.step}, value ${picked.value}`}>
-          <g stroke={runColor(picked.run)} strokeWidth="1" strokeDasharray="4 3" opacity=".8">
+          <g stroke={runColor(picked.run, theme === 'dark')} strokeWidth="1" strokeDasharray="4 3" opacity=".8">
             <line className="hover-guide-x" x1={pickedX} y1={pickedY} x2={pickedX} y2={size.height - BOTTOM} />
             <line className="hover-guide-y" x1={LEFT} y1={pickedY} x2={pickedX} y2={pickedY} />
           </g>
-          <circle className="hover-point" cx={pickedX} cy={pickedY} r="4" fill={runColor(picked.run)} stroke="white" strokeWidth="1.5" />
+          <circle className="hover-point" cx={pickedX} cy={pickedY} r="4" fill={runColor(picked.run, theme === 'dark')} stroke="var(--surface)" strokeWidth="1.5" />
         </svg>
         <div className="hover-axis-label hover-x" aria-label={`X value: ${Math.round(picked.step)}`}
           style={{ left: Math.max(0, Math.min(size.width - stepLabelWidth, pickedX - stepLabelWidth / 2)), width: stepLabelWidth, top: size.height - BOTTOM + 6 }}>{stepLabel}</div>

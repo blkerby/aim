@@ -35,10 +35,10 @@ export function connectedInterval(top: number, bottom: number, prevTop: number, 
   }
   return [top, bottom];
 }
-export function runColor(id: string): string {
+export function runColor(id: string, dark = false): string {
   let hash = 2166136261;
   for (const ch of id) hash = Math.imul(hash ^ ch.charCodeAt(0), 16777619);
-  return `hsl(${(hash >>> 0) % 360} 61% 43%)`;
+  return `hsl(${(hash >>> 0) % 360} ${dark ? "72% 68%" : "61% 43%"})`;
 }
 export const defaultView = (): View => ({ domain: null, follow: true, scale: 'linear' });
 export function contextLabel(metric: Metric): string {
