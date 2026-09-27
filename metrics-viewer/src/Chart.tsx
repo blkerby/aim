@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { scaleLinear, scaleLog } from 'd3-scale';
 import type { Domain, Metric, Run, SeriesSpec, Summary, View } from './types';
-import { contextLabel, displayDomain, formatHoverValue, includesLatest, runColor } from './geometry';
+import { contextLabel, displayDomain, formatAxisTicks, formatHoverValue, includesLatest, runColor } from './geometry';
 import { paintEnvelope } from './renderEnvelope';
 import { getCached, loadSeries, putCached } from './data';
 import { useSize } from './hooks';
@@ -107,10 +107,11 @@ export default function Chart({ theme, metric, runs, view, full, refresh, onView
     ctx.textAlign = 'right';
     let yTicks = yScale.ticks(5);
     if (yTicks.length > 8) yTicks = yTicks.filter((_, i) => i % Math.ceil(yTicks.length / 8) === 0);
-    for (const value of yTicks) {
+    const yLabels = formatAxisTicks(yTicks);
+    for (const [i, value] of yTicks.entries()) {
       const y = yScale(value); ctx.strokeStyle = gridColor; ctx.lineWidth = 1;
       ctx.beginPath(); ctx.moveTo(LEFT, y); ctx.lineTo(size.width - RIGHT, y); ctx.stroke();
-      ctx.fillStyle = tickColor; ctx.fillText(number(value), LEFT - 9, y);
+      ctx.fillStyle = tickColor; ctx.fillText(yLabels[i], LEFT - 9, y, LEFT - 12);
     }
     const xScale = scaleLinear().domain(domain).range([LEFT, size.width - RIGHT]);
     ctx.textAlign = 'center';

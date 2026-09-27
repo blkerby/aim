@@ -1,5 +1,19 @@
 import type { Domain, Metric, View } from './types';
 
+export function formatAxisTicks(ticks: number[]): string[] {
+  // Choose precision for the entire axis so distinct ticks never round to the
+  // same label. Seventeen significant digits distinguish finite JS numbers.
+  let labels: string[] = [];
+  for (let precision = 5; precision <= 17; precision++) {
+    labels = ticks.map(value => value.toLocaleString(undefined, {
+      maximumSignificantDigits: precision,
+      notation: Math.abs(value) >= 1e5 || (value !== 0 && Math.abs(value) < .001) ? 'scientific' : 'standard',
+    }));
+    if (new Set(labels).size === new Set(ticks).size) break;
+  }
+  return labels;
+}
+
 export function formatHoverValue(value: number): string {
   const magnitude = Math.abs(value);
   return value.toLocaleString(undefined, {

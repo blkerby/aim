@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { connectedInterval, defaultView, displayDomain, formatHoverValue, includesLatest } from './geometry';
+import { connectedInterval, defaultView, displayDomain, formatAxisTicks, formatHoverValue, includesLatest } from './geometry';
 import { paintEnvelope } from './renderEnvelope';
 import { buildPickIndex, pickPoint } from './pickPoint';
 import { FrameDecoder } from './protocol';
@@ -104,6 +104,28 @@ describe('local summary picking', () => {
     expect(pickPoint(buildPickIndex([values], 0, 2, y => y), 1, 60)?.value).toBe(100);
     const empty = row([0, 0], [NaN, NaN]); empty.boundaries = [[0, 1], [2, 2]];
     expect(pickPoint(buildPickIndex([empty], 0, 100, y => y), 50, 1.5)).toBeNull();
+  });
+});
+
+describe('axis tick labels', () => {
+  it('preserves small decimal differences from the reported chart', () => {
+    expect(formatAxisTicks([.0048, .00485, .0049, .00495, .005])).toEqual(['0.0048', '0.00485', '0.0049', '0.00495', '0.005']);
+  });
+  it.each([
+    [.00500001, .00500002, .00500003],
+    [-.00500003, -.00500002, -.00500001],
+    [1.000001e-8, 1.000002e-8, 1.000003e-8],
+    [100000001, 100000002, 100000003],
+    [1, 1 + Number.EPSILON, 1 + 2 * Number.EPSILON],
+  ])('distinguishes nearby ticks in %j', (...ticks) => {
+    const labels = formatAxisTicks(ticks);
+    expect(new Set(labels).size).toBe(ticks.length);
+    expect(labels.map(label => Number(label.replaceAll(',', '')))).toEqual(ticks);
+  });
+  it('keeps ordinary labels compact and handles empty or single-tick axes', () => {
+    expect(formatAxisTicks([-1, 0, 1])).toEqual(['-1', '0', '1']);
+    expect(formatAxisTicks([])).toEqual([]);
+    expect(formatAxisTicks([.005])).toEqual(['0.005']);
   });
 });
 
