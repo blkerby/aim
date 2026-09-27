@@ -1,0 +1,118 @@
+{
+  "repo": "/home/kerby/map-gen/.aim",
+  "runCount": 156,
+  "nofile": [
+    1024,
+    524288
+  ],
+  "scenarios": [
+    {
+      "selectedRuns": 10,
+      "matchedRuns": 8,
+      "catalogSeconds": 0.07692405200214125,
+      "firstPass": {
+        "seconds": 0.07779958700120915,
+        "rawPoints": 7805
+      },
+      "warmPass": {
+        "seconds": 0.005046417994890362,
+        "rawPoints": 7805
+      },
+      "before": {
+        "cacheBytes": 0,
+        "cacheLimitBytes": 536870912,
+        "cachedSeries": 0,
+        "openReaders": 0,
+        "peakReaders": 1,
+        "seriesLoads": 0,
+        "openFiles": 4,
+        "rssBytes": 118837248
+      },
+      "after": {
+        "cacheBytes": 124880,
+        "cacheLimitBytes": 536870912,
+        "cachedSeries": 8,
+        "openReaders": 0,
+        "peakReaders": 1,
+        "seriesLoads": 8,
+        "openFiles": 4,
+        "rssBytes": 123813888
+      },
+      "catalogErrors": []
+    },
+    {
+      "selectedRuns": 50,
+      "matchedRuns": 48,
+      "catalogSeconds": 0.37302347800141433,
+      "firstPass": {
+        "seconds": 0.26531597600114765,
+        "rawPoints": 21824
+      },
+      "warmPass": {
+        "seconds": 0.02116571499936981,
+        "rawPoints": 21824
+      },
+      "before": {
+        "cacheBytes": 0,
+        "cacheLimitBytes": 536870912,
+        "cachedSeries": 0,
+        "openReaders": 0,
+        "peakReaders": 1,
+        "seriesLoads": 0,
+        "openFiles": 4,
+        "rssBytes": 130048000
+      },
+      "after": {
+        "cacheBytes": 349184,
+        "cacheLimitBytes": 536870912,
+        "cachedSeries": 48,
+        "openReaders": 0,
+        "peakReaders": 1,
+        "seriesLoads": 48,
+        "openFiles": 4,
+        "rssBytes": 137465856
+      },
+      "catalogErrors": []
+    },
+    {
+      "selectedRuns": 156,
+      "matchedRuns": 154,
+      "catalogSeconds": 0.7674238309991779,
+      "firstPass": {
+        "seconds": 0.9785631569975521,
+        "rawPoints": 112996
+      },
+      "warmPass": {
+        "seconds": 0.06158629200217547,
+        "rawPoints": 112996
+      },
+      "before": {
+        "cacheBytes": 0,
+        "cacheLimitBytes": 536870912,
+        "cachedSeries": 0,
+        "openReaders": 0,
+        "peakReaders": 1,
+        "seriesLoads": 0,
+        "openFiles": 4,
+        "rssBytes": 146554880
+      },
+      "after": {
+        "cacheBytes": 1807936,
+        "cacheLimitBytes": 536870912,
+        "cachedSeries": 154,
+        "openReaders": 0,
+        "peakReaders": 1,
+        "seriesLoads": 154,
+        "openFiles": 4,
+        "rssBytes": 153112576
+      },
+      "catalogErrors": []
+    }
+  ],
+  "spikeCheck": {
+    "rawPoints": 5237,
+    "rawMaximum": 0.3428910043819997,
+    "envelopeMaximum": 0.3428910043819997,
+    "width": 300
+  }
+}

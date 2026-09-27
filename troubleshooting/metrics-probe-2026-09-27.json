@@ -1,0 +1,185 @@
+{
+  "repo": "/home/kerby/map-gen/.aim",
+  "nofile": [
+    524288,
+    524288
+  ],
+  "sql_runs": 156,
+  "metadata_scan_seconds": 3.028567342000315,
+  "meta_chunk_dirs": 311,
+  "scalar_series_in_chunks": 44050,
+  "scalar_series_in_sql_runs_chunks": 20326,
+  "unique_metric_names_in_sql_runs_chunks": 373,
+  "series_per_sql_run_min_median_max": [
+    0,
+    136.0,
+    295
+  ],
+  "indexed_runs": 157,
+  "sql_runs_missing_from_index": [],
+  "scalar_series_in_sql_runs_index": 20326,
+  "index_open_fds": 8,
+  "examples": [
+    {
+      "run": "b1f98301749f46bda12eeefc",
+      "metric": "loss",
+      "points": 5237,
+      "full_read_seconds": 0.02869390200066846,
+      "sampled_points": 500,
+      "nonfinite_points": 0,
+      "full_step_min_max": [
+        4257,
+        9493
+      ],
+      "sample_step_gap_min_median_max": [
+        1.0,
+        8.0,
+        61.0
+      ],
+      "full_value_min_max": [
+        0.016488486335113822,
+        0.3428910043819997
+      ],
+      "sample_value_min_max": [
+        0.01656655351621339,
+        0.025845376063474153
+      ]
+    },
+    {
+      "run": "b1f98301749f46bda12eeefc",
+      "metric": "success_rate",
+      "points": 5237,
+      "full_read_seconds": 0.028761393994500395,
+      "sampled_points": 500,
+      "nonfinite_points": 0,
+      "full_step_min_max": [
+        4257,
+        9493
+      ],
+      "sample_step_gap_min_median_max": [
+        1.0,
+        8.0,
+        61.0
+      ],
+      "full_value_min_max": [
+        0.0455322265625,
+        0.259033203125
+      ],
+      "sample_value_min_max": [
+        0.0482177734375,
+        0.2587890625
+      ]
+    },
+    {
+      "run": "dec4787d27064fdc903a6e6d",
+      "metric": "loss",
+      "points": 1701,
+      "full_read_seconds": 0.009660087001975626,
+      "sampled_points": 500,
+      "nonfinite_points": 0,
+      "full_step_min_max": [
+        314,
+        2014
+      ],
+      "sample_step_gap_min_median_max": [
+        1.0,
+        2.0,
+        20.0
+      ],
+      "full_value_min_max": [
+        0.05712794877884638,
+        0.10712825685792873
+      ],
+      "sample_value_min_max": [
+        0.05781202051196791,
+        0.10564803767920239
+      ]
+    },
+    {
+      "run": "dec4787d27064fdc903a6e6d",
+      "metric": "success_rate",
+      "points": 1701,
+      "full_read_seconds": 0.009577767996233888,
+      "sampled_points": 500,
+      "nonfinite_points": 0,
+      "full_step_min_max": [
+        314,
+        2014
+      ],
+      "sample_step_gap_min_median_max": [
+        1.0,
+        2.0,
+        20.0
+      ],
+      "full_value_min_max": [
+        0.0,
+        0.000732421875
+      ],
+      "sample_value_min_max": [
+        0.0,
+        0.000732421875
+      ]
+    },
+    {
+      "run": "e84d4e62964043eca7575c31",
+      "metric": "loss",
+      "points": 3200,
+      "full_read_seconds": 0.017690826003672555,
+      "sampled_points": 500,
+      "nonfinite_points": 0,
+      "full_step_min_max": [
+        0,
+        3199
+      ],
+      "sample_step_gap_min_median_max": [
+        1.0,
+        5.0,
+        39.0
+      ],
+      "full_value_min_max": [
+        0.01239700031517259,
+        0.24268493347030168
+      ],
+      "sample_value_min_max": [
+        0.012500494104233439,
+        0.24268493347030168
+      ]
+    },
+    {
+      "run": "e84d4e62964043eca7575c31",
+      "metric": "success_rate",
+      "points": 3200,
+      "full_read_seconds": 0.017707924998831004,
+      "sampled_points": 500,
+      "nonfinite_points": 0,
+      "full_step_min_max": [
+        0,
+        3199
+      ],
+      "sample_step_gap_min_median_max": [
+        1.0,
+        5.0,
+        39.0
+      ],
+      "full_value_min_max": [
+        0.0,
+        0.3492431640625
+      ],
+      "sample_value_min_max": [
+        0.0,
+        0.34521484375
+      ]
+    }
+  ],
+  "fd_baseline": 5,
+  "held_seq_databases": 156,
+  "held_seq_fds": 855,
+  "held_seq_open_seconds": 0.8853897799999686,
+  "fd_after_close": 5,
+  "controlled_fd_check": {
+    "soft_limit": 1024,
+    "reserved_server_overhead_fds": 8,
+    "error": "b'IO error: While open a file for random read: /home/kerby/map-gen/.aim/meta/chunks/ba61eb4e676d4eb7b9be509c/000019.sst: Too many open files'",
+    "opened_databases": 218
+  }
+}
