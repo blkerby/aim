@@ -422,6 +422,9 @@ button:hover {
   width:100%;
   position:relative;
 }
+.plot-surface {
+  position:absolute;
+}
 .plot canvas {
   width:100%;
   height:100%;

@@ -18,7 +18,7 @@ interface Props {
   onView: (view: View) => void; onFocus: () => void;
 }
 export default function Chart({ theme, metric, runs, view, full, refresh, onView, onFocus }: Props) {
-  const [host, size] = useSize<HTMLDivElement>();
+  const [host, size] = useSize<HTMLDivElement>(true);
   const canvas = useRef<HTMLCanvasElement>(null);
   const requestedDomain = displayDomain(view, full);
   const width = Math.max(1, Math.round(size.width * size.dpr) - Math.round((LEFT + RIGHT) * size.dpr));
@@ -167,6 +167,7 @@ export default function Chart({ theme, metric, runs, view, full, refresh, onView
       </div>
     </header>
     <div className="plot" ref={host}>
+      <div className="plot-surface" style={{ left: size.offsetX, top: size.offsetY, width: size.width, height: size.height }}>
       <canvas ref={canvas} aria-label={`${metric.name} chart, step ${number(domain[0])} to ${number(domain[1])}`} role="img"
         onDoubleClick={() => onView({ ...view, domain: null, follow: true })}
         onPointerDown={event => { if (event.button !== 0) return; const x = localX(event.clientX); dragRef.current = [x, x]; setDrag([x, x]); clearHover(); event.currentTarget.setPointerCapture(event.pointerId); }}
@@ -217,7 +218,7 @@ export default function Chart({ theme, metric, runs, view, full, refresh, onView
         <div className="hover-axis-label hover-y" aria-label={`Y value: ${picked.value}`}
           style={{ left: 4, width: LEFT - 8, fontSize: Math.min(10, (LEFT - 14) / (valueLabel.length * .61)), top: Math.max(TOP, Math.min(size.height - BOTTOM - 20, pickedY - 10)) }}>{valueLabel}</div>
       </>}
-
+      </div>
     </div>
     {error && <div className="chart-error" title={error}>Refresh failed · retaining previous data <span>{error}</span></div>}
   </article>;

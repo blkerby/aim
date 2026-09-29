@@ -2,6 +2,7 @@ import type { Summary } from './types';
 
 export interface PickedPoint { run: string; step: number; value: number; x: number; y: number; aggregated: boolean }
 interface IndexedRow { row: Summary; bins: number[]; x: Float64Array; lowY: Float64Array; highY: Float64Array }
+const HOVER_RADIUS = 20; // CSS pixels, independent of device pixel ratio.
 
 /** Build once per displayed snapshot/size/scale; pointer motion only searches
  * cached screen coordinates, never the server or the Canvas curves. */
@@ -18,7 +19,7 @@ export function buildPickIndex(rows: Summary[], left: number, plotWidth: number,
 }
 
 export function pickPoint(index: IndexedRow[], x: number, y: number): PickedPoint | null {
-  let best: PickedPoint | null = null, distance = Infinity;
+  let best: PickedPoint | null = null, distance = HOVER_RADIUS ** 2;
   for (const entry of index) {
     const { row, bins, x: xs, lowY, highY } = entry;
     let lo = 0, hi = xs.length;
@@ -35,7 +36,7 @@ export function pickPoint(index: IndexedRow[], x: number, y: number): PickedPoin
       const bin = bins[j];
       for (const [value, py] of [[row.low[bin], lowY[j]], [row.high[bin], highY[j]]]) {
         const d = dx * dx + (py - y) ** 2;
-        if (d < distance) {
+        if (d < distance || (best === null && d === distance)) {
           distance = d;
           const aggregated = row.counts[bin] > 1;
           best = { run: row.run, value, x: xs[j], y: py, aggregated,

@@ -101,7 +101,7 @@ describe('local summary picking', () => {
   it('uses logarithmic Y distance and ignores gaps and synthetic boundary points', () => {
     const values = row([1, 1], [1, 100]);
     expect(pickPoint(buildPickIndex([values], 0, 2, Math.log10), 1, .8)?.value).toBe(1);
-    expect(pickPoint(buildPickIndex([values], 0, 2, y => y), 1, 60)?.value).toBe(100);
+    expect(pickPoint(buildPickIndex([values], 0, 2, y => y / 10), 1, 6)?.value).toBe(100);
     const empty = row([0, 0], [NaN, NaN]); empty.boundaries = [[0, 1], [2, 2]];
     expect(pickPoint(buildPickIndex([empty], 0, 100, y => y), 50, 1.5)).toBeNull();
   });

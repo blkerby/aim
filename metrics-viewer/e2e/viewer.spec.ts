@@ -23,6 +23,37 @@ test.beforeEach(async ({ page, request }) => {
   await page.goto('/');
 });
 
+for (const dpr of [1, 1.25, 2]) {
+  test.describe(`canvas alignment at ${dpr}x`, () => {
+    test.use({ deviceScaleFactor: dpr });
+    test('keeps every column on physical pixels after resizing and scrolling', async ({ page }) => {
+      await select(page, ['metric_00', 'metric_01', 'metric_02']);
+      await page.getByRole('button', { name: 'Ⅱ Pause' }).click();
+      const assertAligned = async () => {
+        await expect.poll(() => page.locator('canvas').evaluateAll(nodes => nodes.every(node => {
+          const rect = node.getBoundingClientRect(), ratio = window.devicePixelRatio;
+          const aligned = (value: number) => Math.abs(value - Math.round(value)) < .025;
+          return aligned(rect.x * ratio) && aligned(rect.y * ratio)
+            && Math.abs(rect.width * ratio - node.width) < .025
+            && Math.abs(rect.height * ratio - node.height) < .025;
+        }))).toBe(true);
+      };
+      for (const width of [1439, 1440]) {
+        await page.setViewportSize({ width, height: 1000 });
+        for (const count of [2, 3]) {
+          await page.getByRole('combobox', { name: 'Charts per row' }).selectOption(String(count));
+          await assertAligned();
+        }
+      }
+      await page.getByRole('button', { name: 'Collapse side panel' }).click();
+      await assertAligned();
+      await page.setViewportSize({ width: 700, height: 1000 });
+      await page.locator('.chart-scroll').evaluate(node => { node.scrollLeft = 17; });
+      await assertAligned();
+    });
+  });
+}
+
 test('selects runs/metrics, switches log scale, persists choices, and renders sparse/dense/mixed charts', async ({ page }) => {
   const errors: string[] = []; page.on('pageerror', error => errors.push(error.message));
   await select(page, ['metric_00','metric_01','metric_02']);
@@ -211,7 +242,8 @@ test('picks local summaries with dashed guides and values entirely in axis margi
     const chart = page.locator(`[data-metric="${name}"]`);
     const rect = (await chart.locator('canvas').boundingBox())!;
     const before = await chart.locator('canvas').evaluate(node => (node as HTMLCanvasElement).toDataURL());
-    await page.mouse.move(rect.x + 64 + (rect.width - 80) * .4, rect.y + 12 + (rect.height - 42) * .5);
+    const endpoint = (await chart.locator('.endpoint-marker').boundingBox())!;
+    await page.mouse.move(endpoint.x + endpoint.width / 2 - 1, endpoint.y + endpoint.height / 2);
     await expect(chart.locator('.hover-point')).toBeVisible();
     await expect(chart.locator('.chart-tooltip')).toHaveCount(0);
     const step = Number((await chart.locator('.hover-x').getAttribute('aria-label'))!.replace('X value: ', ''));
@@ -241,7 +273,7 @@ test('picks local summaries with dashed guides and values entirely in axis margi
   await page.context().setOffline(false);
 });
 
-test('picks samples from every chart margin, including the latest point from the right', async ({ page }) => {
+test('picks nearby samples from chart margins and clears selection beyond 20px', async ({ page }) => {
   await select(page, ['metric_01']);
   await page.getByRole('button', { name: 'Ⅱ Pause' }).click();
   const chart = page.locator('[data-metric="metric_01"]');
@@ -253,13 +285,20 @@ test('picks samples from every chart margin, including the latest point from the
   await expect(chart.locator('.hover-point')).toBeVisible();
   for (const [x, y] of [[5, rect.height / 2], [rect.width / 2, 5], [rect.width / 2, rect.height - 5]]) {
     await page.mouse.move(rect.x + x, rect.y + y);
-    await expect(chart.locator('.hover-point')).toBeVisible();
+    await expect(chart.locator('.hover-point, .hover-axis-label')).toHaveCount(0);
   }
-  // The value boxes must not intercept the pointer or dismiss the highlight.
+  const x = endpoint.x + endpoint.width / 2, y = endpoint.y + endpoint.height / 2;
+  for (const distance of [19, 21]) {
+    await page.mouse.move(x, y - distance);
+    await expect(chart.locator('.hover-point, .hover-axis-label')).toHaveCount(distance <= 20 ? 3 : 0);
+  }
+  // Moving onto a distant axis label must also clear selection.
   for (const label of ['.hover-x', '.hover-y']) {
+    await page.mouse.move(x - 1, y);
+    await expect(chart.locator('.hover-point')).toBeVisible();
     const box = (await chart.locator(label).boundingBox())!;
     await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
-    await expect(chart.locator('.hover-point')).toBeVisible();
+    await expect(chart.locator('.hover-point, .hover-axis-label')).toHaveCount(0);
   }
   await page.mouse.move(10, 10);
   await expect(chart.locator('.hover-point, .hover-axis-label')).toHaveCount(0);

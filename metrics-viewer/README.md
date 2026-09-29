@@ -56,7 +56,7 @@ terminals. Vite proxies `/api` to port 43801.
   or stale runs stay still. Missing heartbeats (e.g. copied datasets) stay still.
   This small activity pulse remains enabled with reduced-motion preferences.
 - Hover highlights the nearest displayed min/max reference or sparse sample in
-  screen space. Dashed guides connect it to the axes; X/Y value boxes stay in the
+  screen space within 20px of the cursor. Dashed guides connect it to the axes; X/Y value boxes stay in the
   margins. Dense columns use a recorded middle step for the X label (the lower
   median for an even count); Y is the observed min or max. The representative
   step need not be where the extremum occurred within that pixel column. Sparse
